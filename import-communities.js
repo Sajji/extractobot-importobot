@@ -109,8 +109,11 @@ async function importCommunities() {
       console.log('Root community added successfully:', rootCommunity.name);
     }
   } catch (error) {
+    if (error.response && error.response.status === 400) {
+      console.log('Root community already exists, skipping:', rootCommunity.name);
+    } else {
     console.error('Error while importing root community:', error.message);
-    return;
+    }
   }
 
   // Replace UUIDs in the communities
