@@ -13,7 +13,7 @@ const assets = JSON.parse(fs.readFileSync(assetsFilePath, 'utf8'));
 const fetchAllAttributes = async () => {
   let allAttributes = [];
   let offset = 0;
-  const limit = 1000;  // Adjust based on API limitations
+  const limit = 1000;
 
   while (true) {
     const url = `${config.apiURL}/attributes?offset=${offset}&limit=${limit}&countLimit=-1`;
@@ -25,12 +25,14 @@ const fetchAllAttributes = async () => {
         },
       });
 
+      const results = response.data.results;
+
       // Filter the results based on the asset.id
-      const filteredResults = response.data.results.filter(result =>
+      const filteredResults = results.filter(result =>
         assets.some(asset => asset.id === result.asset.id)
       );
 
-      // Map the results to the desired format
+      // Map to desired format
       const mappedResults = filteredResults.map(result => ({
         assetId: result.asset.id,
         typeId: result.type.id,
@@ -38,23 +40,22 @@ const fetchAllAttributes = async () => {
       }));
 
       allAttributes = allAttributes.concat(mappedResults);
+      console.log(`Fetched ${results.length} results, ${mappedResults.length} matched`);
 
-      if (filteredResults.length < limit) {
-        // Break the loop if there are no more results
+      if (results.length < limit) {
+        // No more pages
         break;
       }
 
-      offset += limit;  // Increase offset for next page
+      offset += limit;
     } catch (error) {
-      console.error('Error fetching attributes:', error.message);
-      break;  // Break on error
+      console.error('❌ Error fetching attributes:', error.message);
+      break;
     }
   }
 
-  // Write the collected data to a file
   fs.writeFileSync(outputFilePath, JSON.stringify(allAttributes, null, 2), 'utf8');
-  console.log(`All attributes saved to ${outputFilePath}`);
+  console.log(`✅ All attributes saved to ${outputFilePath}`);
 };
 
-// Export the function instead of auto-executing it
 module.exports = fetchAllAttributes;
