@@ -7,6 +7,13 @@ const configPath = './config.json';
 const outputFilePath = './extractedData/allAttributes.json';
 const assetsFilePath = './extractedData/assets.json';
 
+// ✅ Check if assets file exists before continuing
+if (!fs.existsSync(assetsFilePath)) {
+  console.error("❌ No assets found.");
+  process.exit(1); // Exit the script with error
+}
+
+// Load configuration and asset data
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 const assets = JSON.parse(fs.readFileSync(assetsFilePath, 'utf8'));
 
@@ -27,12 +34,10 @@ const fetchAllAttributes = async () => {
 
       const results = response.data.results;
 
-      // Filter the results based on the asset.id
       const filteredResults = results.filter(result =>
         assets.some(asset => asset.id === result.asset.id)
       );
 
-      // Map to desired format
       const mappedResults = filteredResults.map(result => ({
         assetId: result.asset.id,
         typeId: result.type.id,
@@ -40,10 +45,9 @@ const fetchAllAttributes = async () => {
       }));
 
       allAttributes = allAttributes.concat(mappedResults);
-      console.log(`Fetched ${results.length} results, ${mappedResults.length} matched`);
+      console.log(`📦 Retrieved: ${results.length}, Matched: ${mappedResults.length}`);
 
       if (results.length < limit) {
-        // No more pages
         break;
       }
 
