@@ -15,6 +15,4 @@ run: npm install
 
 run: node 0-exportAll.js
 
-# To Import
-
-run: node x-importAll.js
+# Import - partially working
